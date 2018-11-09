@@ -44,15 +44,13 @@ func ProfileArgsFromRequest(r *http.Request) (args *profileArgs, err error) {
 		return
 	}
 
-	if args.Pid == 0 {
-		err = errors.Wrapf(err, "pid must be non-zero")
-		return
-	}
-
 	return
 }
 
 func (s *Server) HandleProfile(w http.ResponseWriter, r *http.Request) {
+	sess := s.logger.Session("profile")
+	ctx := context.WithValue(context.Background(), "logger", sess)
+
 	args, err := ProfileArgsFromRequest(r)
 	if err != nil {
 		w.WriteHeader(400)
@@ -72,7 +70,8 @@ func (s *Server) HandleProfile(w http.ResponseWriter, r *http.Request) {
 		uid        = xid.New().String()
 		outputFile = path.Join(s.assetsDirectory, uid)
 	)
-	err = execution.Record(context.Background(), outputFile)
+
+	err = execution.Record(ctx, outputFile)
 	if err != nil {
 		log.Printf("%+v\n", err)
 		w.WriteHeader(500)

@@ -3,6 +3,7 @@ package perf
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"os/exec"
 	"strconv"
@@ -37,14 +38,19 @@ func (e *execution) GenerateFlamegraph(ctx context.Context, profile string, w io
 		return
 	}
 
-	cmd := exec.Command("/bin/bash", "-e", "-o", "pipefail", "-c",
-		"perf script | stackcollapse-perf.pl | flamegraph.pl")
+	var (
+		buffer = new(bytes.Buffer)
+		cmd    = exec.Command("/bin/bash", "-e", "-o", "pipefail", "-c",
+			fmt.Sprintf("perf script --input=%s | stackcollapse-perf.pl | flamegraph.pl --width 2000", profile))
+	)
+
 	cmd.Stdout = w
+	cmd.Stderr = buffer
 
 	err = RunWithContext(ctx, cmd)
 	if err != nil {
 		err = errors.Wrapf(err,
-			"failed to generate flamegraph for profile %s", profile)
+			"failed to generate flamegraph for profile %s - %s", profile, string(buffer.Bytes()))
 		return
 	}
 
@@ -52,13 +58,19 @@ func (e *execution) GenerateFlamegraph(ctx context.Context, profile string, w io
 }
 
 func (e *execution) Record(ctx context.Context, outputFile string) (err error) {
+	argv := []string{"record", "-g", "--freq", strconv.FormatUint(e.frequency, 10)}
+
+	if e.pid != 0 {
+		argv = append(argv, "--pid="+strconv.FormatUint(e.pid, 10))
+	} else {
+		argv = append(argv, "-a")
+	}
+
+	argv = append(argv, "--output="+outputFile, "sleep", strconv.FormatUint(e.samplingDuration, 10))
+
 	var (
-		cmd = exec.Command("perf", "record", "-g",
-			"--freq", strconv.FormatUint(e.frequency, 10),
-			"--pid", strconv.FormatUint(e.pid, 10),
-			"--output="+outputFile,
-			"sleep", strconv.FormatUint(e.samplingDuration, 10))
 		buffer = new(bytes.Buffer)
+		cmd    = exec.Command("perf", argv...)
 	)
 
 	cmd.Stderr = buffer
@@ -75,6 +87,8 @@ func (e *execution) Record(ctx context.Context, outputFile string) (err error) {
 
 func RunWithContext(ctx context.Context, cmd *exec.Cmd) (err error) {
 	var cmdChan = make(chan error, 1)
+
+	fmt.Println(cmd.Args)
 
 	err = cmd.Start()
 	go func() {
