@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -o errexit
+set -o xtrace
+
+main () {
+	if [[ -z "$1" ]]; then
+		"Usage: $0 <pid>"
+	fi
+
+	record $1
+	generate_flamegraph
+}
+
+record () {
+	local pid=$1
+
+	perf record \
+		--freq 99 \
+		--pid $pid \
+		-g \
+		sleep 15
+
+}
+
+generate_flamegraph () {
+	perf script | \
+		stackcollapse-perf.pl | \
+		flamegraph.pl > out.svg
+}
+
+main "$@"
+
