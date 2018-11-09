@@ -48,8 +48,7 @@ func ProfileArgsFromRequest(r *http.Request) (args *profileArgs, err error) {
 }
 
 func (s *Server) HandleProfile(w http.ResponseWriter, r *http.Request) {
-	sess := s.logger.Session("profile")
-	ctx := context.WithValue(context.Background(), "logger", sess)
+	ctx := context.Background()
 
 	args, err := ProfileArgsFromRequest(r)
 	if err != nil {

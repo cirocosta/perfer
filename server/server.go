@@ -4,17 +4,15 @@ import (
 	"net"
 	"net/http"
 
-	"code.cloudfoundry.org/lager"
 	"github.com/pkg/errors"
 )
 
 type Server struct {
-	logger          lager.Logger
 	listener        net.Listener
 	assetsDirectory string
 }
 
-func NewServer(logger lager.Logger, address, assetsDirectory string) (server *Server, err error) {
+func NewServer(address, assetsDirectory string) (server *Server, err error) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		err = errors.Wrapf(err,
@@ -23,7 +21,6 @@ func NewServer(logger lager.Logger, address, assetsDirectory string) (server *Se
 	}
 
 	server = &Server{
-		logger:          logger,
 		listener:        listener,
 		assetsDirectory: assetsDirectory,
 	}

@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"code.cloudfoundry.org/lager"
 	"github.com/cirocosta/perfer/server"
 	"github.com/pkg/errors"
 )
@@ -16,7 +15,6 @@ import (
 var (
 	address         = flag.String("address", ":25000", "address to listen for requests")
 	assetsDirectory = flag.String("assets", "/tmp", "directory to place assets")
-	logger          = lager.NewLogger("perfer")
 )
 
 func handleSignals(cancel context.CancelFunc) {
@@ -33,7 +31,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	go handleSignals(cancel)
 
-	s, err := server.NewServer(logger, *address, *assetsDirectory)
+	s, err := server.NewServer(*address, *assetsDirectory)
 	if err != nil {
 		log.Panic(err)
 	}
