@@ -19,6 +19,22 @@ RATIONALE
 	[2]: http://man7.org/linux/man-pages/man1/perf.1.html
 	[3]: https://github.com/brendangregg/FlameGraph
 
+USAGE
+
+	Run the server in a given machine you want to analyze:
+
+		perfer --addr=:1313
+
+
+	Create a flamegraph that samples all procs:
+
+		curl machine_ip:1313/flamegraph?freq=99&seconds=10'
+
+
+	Create a flamegraph that samples a specific pid:
+
+		curl machine_ip:1313/flamegraph?freq=99&seconds=10&pid=3212'
+
 
 DEPENDENCIES
 	- perf
