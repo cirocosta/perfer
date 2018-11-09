@@ -24,14 +24,25 @@ DEPENDENCIES
 
 
 API
-	POST /profile?pid=$PID&freq=$FREQ&seconds=$SECONDS
+	GET /profile?pid=$PID&freq=$FREQ&seconds=$SECONDS
+
 		Performs the capture and streams back in tgz the `perf script`
 		results (after a record happens) so that further processing can 
 		be performed by the user.
 
-	POST /flamegraph?pid=$PID&freq=$FREQ&seconds=$SECONDS
+		If no `PID` specified, all of processes get sampled.
+
+
+	GET /flamegraph?pid=$PID&freq=$FREQ&seconds=$SECONDS
+
 		Performs the capture and then returns a URL where a given
 		flamegraph.svg is served, allowing the user to share it.
 
-	GET /flamegraphs 	lists all available flamegraphs
-	GET /flamegraphs/:id 	visualizes a specific flamegraph
+		If no `PID` specified, all of processes get sampled.
+
+
+	GET /static/<content> 	
+
+		Retrieves the contents stored under the configured assets
+		directory (this is where profiles and framegraphs get saved).
+
