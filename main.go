@@ -12,7 +12,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-var address = flag.String("address", ":25000", "address to listen for requests")
+var (
+	address         = flag.String("address", ":25000", "address to listen for requests")
+	assetsDirectory = flag.String("assets", "/tmp", "directory to place assets")
+)
 
 func handleSignals(cancel context.CancelFunc) {
 	sigChan := make(chan os.Signal, 1)
@@ -28,7 +31,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	go handleSignals(cancel)
 
-	s, err := server.NewServer(*address)
+	s, err := server.NewServer(*address, *assetsDirectory)
 	if err != nil {
 		log.Panic(err)
 	}

@@ -8,10 +8,11 @@ import (
 )
 
 type Server struct {
-	listener net.Listener
+	listener        net.Listener
+	assetsDirectory string
 }
 
-func NewServer(address string) (server *Server, err error) {
+func NewServer(address, assetsDirectory string) (server *Server, err error) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		err = errors.Wrapf(err,
@@ -19,11 +20,15 @@ func NewServer(address string) (server *Server, err error) {
 		return
 	}
 
-	http.HandleFunc("/profile", HandleProfile)
-
 	server = &Server{
-		listener: listener,
+		listener:        listener,
+		assetsDirectory: assetsDirectory,
 	}
+
+	http.HandleFunc("/profile", server.HandleProfile)
+	http.Handle("/static/",
+		http.StripPrefix("/static/",
+			http.FileServer(http.Dir(assetsDirectory))))
 
 	return
 }
