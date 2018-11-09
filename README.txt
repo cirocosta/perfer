@@ -1,3 +1,6 @@
+A wrapper on top of `perf` and `flamegraphs` to generate flamegraphs on demand.
+
+
 RATIONALE
 	pprof[1] is great for a user to understand what's going under
 	the hood of a particular golang application, but it limits
