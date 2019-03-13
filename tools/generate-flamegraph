@@ -1,33 +1,33 @@
 #!/bin/bash
 
+# captures a trace 
+
 set -o errexit
 set -o xtrace
 
 main () {
-	if [[ -z "$1" ]]; then
-		"Usage: $0 <pid>"
-	fi
-
 	record $1
 	generate_flamegraph
 }
 
 record () {
-	local pid=$1
+	local pid="--pid $1"
+
+	if [[ -z "$1" ]]; then
+		pid="-a"
+	fi
 
 	perf record \
 		--freq 99 \
-		--pid $pid \
+		"$pid" \
 		-g \
-		sleep 15
-
+		sleep 30
 }
 
 generate_flamegraph () {
 	perf script | \
 		stackcollapse-perf.pl | \
-		flamegraph.pl > out.svg
+		flamegraph.pl --width=2000 > out.svg
 }
 
 main "$@"
-
